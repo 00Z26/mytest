@@ -63,7 +63,7 @@ public class Http1 {
 
             //定义要输出字节
             byte data[];
-            data = getBytes("Hello,I love you ~OVO");
+            data = getBytes("Hello,I can hear you and I love you ~OVO");
             //响应的头
             String head =  "HTTP/1.1200OK\n"+"Content-Type:text/html\n" + "Server:myserver\n" + "\n";
             try {
