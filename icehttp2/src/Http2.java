@@ -58,7 +58,7 @@ public class Http2 {
         //String url;
         private String getqs(String text) {
             String queryresource = null;
-            System.out.println(text);
+            //System.out.println(text);
             text = text.substring(text.indexOf('/'));
             text = text.substring(0, text.indexOf(' '));
             System.out.println(text);
@@ -107,20 +107,23 @@ public class Http2 {
         private byte[] getFB(String Filename) throws IOException {
             File file = new File(Filename);
             ByteArrayOutputStream by = new ByteArrayOutputStream();
-
-            try {
-                FileInputStream fileb = new FileInputStream(file);
-                byte[] b = new byte[1000];
-                int read;
-                while ((read = fileb.read(b)) != -1) {
-                    by.write(b, 0, read);
+            byte[] b = new byte[1000];
+            if(file.exists()) {
+                try {
+                    FileInputStream fileb = new FileInputStream(file);
+                    int read;
+                    while ((read = fileb.read(b)) != -1) {
+                        by.write(b, 0, read);
+                    }
+                    fileb.close();
+                    by.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                fileb.close();
-                by.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                return by.toByteArray();
+            }else{
+                return null;
             }
-            return by.toByteArray();
         }
 
         public void run() {
@@ -136,11 +139,13 @@ public class Http2 {
                 String qs = getqs(content);
                 String hd = gethd(qs);
                 while (true) {
-                    //要做一个未找到资源返回404错误，待施工
                     if (hd == "HTTP/1.1404NotFound\n" + "Sever:myserver" + "\n") {
                         assert out != null;
                         try {
+                            hd = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                            String NU = "<html><p>Sorry,I can't find the document you need hereQAQ</p></html>";
                             out.write(hd.getBytes("utf-8"));
+                            out.write(NU.getBytes());
                             out.close();
                             break;
                         } catch (IOException e) {
@@ -150,6 +155,7 @@ public class Http2 {
                         //打开对应文件夹的文件，把文件转化为byte数组
                         byte data[] = new byte[0];
                         data = getFB("here" + qs);
+                        //System.out.println(data);
                         if (data != null) {
                             //在输出流写入
                             try {
@@ -161,24 +167,20 @@ public class Http2 {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                        }else if(data == null){
+                            hd = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                            String NU = "<html><p>Sorry,I can't find your document you need hereQAQ</p></html>";
+                            out.write(hd.getBytes("utf-8"));
+                            out.write(NU.getBytes());
+                            out.close();
+                            break;
                         }
+
                     }
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
