@@ -58,9 +58,10 @@ public class Http2 {
         //String url;
         private String getqs(String text) {
             String queryresource = null;
+            System.out.println(text);
             text = text.substring(text.indexOf('/'));
             text = text.substring(0, text.indexOf(' '));
-            //System.out.println(text);
+            System.out.println(text);
             int index = text.indexOf('?');
             //System.out.println(index);
             if (index != -1) {
@@ -94,7 +95,9 @@ public class Http2 {
                 head = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
             } else if (filetype.equals("jpg") || filetype.equals("gif") || filetype.equals("png")) {
                 head = "HTTP/1.1200OK\n" + "Content-Type:image/jpeg\n" + "Server:myserver\n" + "\n";
-            } else {
+            }else if (filetype.equals("css")){
+                head = "HTTP/1.1200OK\n" + "Content-Type:text/css\n" + "Server:myserver\n" + "\n";
+            }else {
                 head = "HTTP/1.1404NotFound\n" + "Sever:myserver" + "\n";
             }
             return head;
