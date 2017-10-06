@@ -50,18 +50,21 @@ public class Http2 {
             return text;
         }
 
-        //输出http协议
-        //System.out.println(text);
-        //in是浏览器输入的内容
-        // out是服务器输出的内容
+        //写个函数判断http请求get post head
+        public String getrq(String text){
+            String request = text.substring(0,text.indexOf(" "));
+            return request;
+        }
+
         //分析url中请求的文件
         //String url;
+        //文件名
         private String getqs(String text) {
             String queryresource = null;
             //System.out.println(text);
             text = text.substring(text.indexOf('/'));
             text = text.substring(0, text.indexOf(' '));
-            System.out.println(text);
+            //System.out.println(text);
             int index = text.indexOf('?');
             //System.out.println(index);
             if (index != -1) {
@@ -92,13 +95,13 @@ public class Http2 {
             String filetype = filetypes[filetypes.length - 1];
 
             if (filetype.equals("html")) {
-                head = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                head = "HTTP/1.0200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
             } else if (filetype.equals("jpg") || filetype.equals("gif") || filetype.equals("png")) {
-                head = "HTTP/1.1200OK\n" + "Content-Type:image/jpeg\n" + "Server:myserver\n" + "\n";
+                head = "HTTP/1.0200OK\n" + "Content-Type:image/jpeg\n" + "Server:myserver\n" + "\n";
             }else if (filetype.equals("css")){
-                head = "HTTP/1.1200OK\n" + "Content-Type:text/css\n" + "Server:myserver\n" + "\n";
+                head = "HTTP/1.0200OK\n" + "Content-Type:text/css\n" + "Server:myserver\n" + "\n";
             }else {
-                head = "HTTP/1.1404NotFound\n" + "Sever:myserver" + "\n";
+                head = "HTTP/1.0404NotFound\n"+ "Sever:myserver" + "\n";
             }
             return head;
         }
@@ -127,6 +130,8 @@ public class Http2 {
         }
 
         public void run() {
+            //in是浏览器输入的内容
+            // out是服务器输出的内容
             InputStream in = null;
             OutputStream out = null;
             // 监听到之后输出客户端地址
@@ -135,14 +140,42 @@ public class Http2 {
                 //获取输出流的内容
                 in = client.getInputStream();
                 out = client.getOutputStream();
+                //定义响应头
+                String hd;
                 String content = getcont(in);
+                //System.out.print(content);
                 String qs = getqs(content);
-                String hd = gethd(qs);
+                String rq = getrq(content);
+                //System.out.println(hd);
+                //System.out.println(rq);
+                if(rq.equals("POST")){
+                    while (true){
+                        String tx;
+                        hd = "HTTP/1.0200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";;
+                        tx = content.substring(content.indexOf('\n'+"\r"));
+                        tx = tx.substring(tx.indexOf('\r'));
+                        tx = "<html><p>"+"提交的内容是"+ tx + "</p></html>";
+                        out.write(hd.getBytes());
+                        out.write(tx.getBytes("utf-8"));
+                        out.close();
+                        break;
+                    }
+
+                }else if(rq.equals("HEAD")){
+                    while(true){
+                        hd = "HTTP/1.0200Found\n"+ "Server:myserver" + "\n";
+                        out.write(hd.getBytes("utf-8"));
+                        out.close();
+                        break;
+                    }
+
+                } else if (rq.equals("GET")) {
                 while (true) {
-                    if (hd == "HTTP/1.1404NotFound\n" + "Sever:myserver" + "\n") {
+                    hd = gethd(qs);
+                    if (hd == "HTTP/1.0404NotFound\n" + "Server:myserver" + "\n") {
                         assert out != null;
                         try {
-                            hd = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                            hd = "HTTP/1.0200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
                             String NU = "<html><p>Sorry,I can't find the document you need hereQAQ</p></html>";
                             out.write(hd.getBytes("utf-8"));
                             out.write(NU.getBytes());
@@ -167,15 +200,26 @@ public class Http2 {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }else if(data == null){
-                            hd = "HTTP/1.1200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
-                            String NU = "<html><p>Sorry,I can't find your document you need hereQAQ</p></html>";
+                        } else if (data == null) {
+                            hd = "HTTP/1.0200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                            String NU = "<html><p>Sorry,I can't find the document you need hereQAQ</p></html>";
                             out.write(hd.getBytes("utf-8"));
                             out.write(NU.getBytes());
                             out.close();
                             break;
                         }
-
+                    }
+                }
+            }//rq的if
+                else{
+                    //其他请求类型
+                    while(true) {
+                        hd = "HTTP/1.0200OK\n" + "Content-Type:text/html\n" + "Server:myserver\n" + "\n";
+                        String NU = "<html><p>暂不支持此request  emmm.....</p></html>";
+                        out.write(hd.getBytes("utf-8"));
+                        out.write(NU.getBytes());
+                        out.close();
+                        break;
                     }
                 }
             } catch (IOException e) {
