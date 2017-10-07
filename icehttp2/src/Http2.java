@@ -4,7 +4,7 @@ import java.net.Socket;
 
 public class Http2 {
     public static void main(String args[]) throws IOException {
-        int port = 8082;
+        int port = Set.getPort();
         new Http2().start(port);
     }
 
