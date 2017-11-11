@@ -10,6 +10,8 @@
 		//$postObj->Event = '';
 		$toUser = $postObj->FromUserName;
 		$fromUser = $postObj->ToUserName;
+		
+
 		if(strtolower($postObj->MsgType) == 'event'){
 			//如果是subscribe 事件
 			if(strtolower($postObj->Event == 'subscribe') ){
@@ -29,6 +31,8 @@
 				echo $info;			
 			}
 		}
+		
+
 		if($postObj->MsgType == 'text'){
 				$time = time();
 				$msgType = 'text';
@@ -41,7 +45,7 @@
 						<Content><![CDATA[%s]]></Content>
 						</xml>";
 				$reponseTxt = sprintf($template, $toUser, $fromUser, $time, $msgType, $content);
-				echo ;			
+				echo $reponseTxt;			
 		}
 	}
 
