@@ -47,6 +47,21 @@
 				$reponseTxt = sprintf($template, $toUser, $fromUser, $time, $msgType, $content);
 				echo $reponseTxt;			
 		}
+
+		if ($postObj->MsgType == 'voice') {
+			$time = time();
+			$msgType = 'text';
+			$voiceContent = $postObj->Recognition;
+			$template = "<xml>
+						<ToUserName><![CDATA[%s]]></ToUserName>
+						<FromUserName><![CDATA[%s]]></FromUserName>
+						<CreateTime>%s</CreateTime>
+						<MsgType><![CDATA[%s]]></MsgType>
+						<Content><![CDATA[%s]]></Content>
+						</xml>";
+			$sayTxt = sprintf($template, $toUser, $fromUser, $time, $msgType, $voiceContent);
+			echo $sayTxt;
+		}
 	}
 
 
